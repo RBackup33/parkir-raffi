@@ -1,82 +1,114 @@
 <template>
-  <div class="transaksi-container">
-    <div class="header">
-      <h2>Daftar Transaksi Parkir</h2>
-      <NuxtLink to="/petugas/transaksi/payment" class="btn-add">
-        + Transaksi Baru
-      </NuxtLink>
-    </div>
+  <div class="min-h-screen bg-slate-100 p-6">
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded-3xl shadow-lg border border-slate-200">
+      
+      <!-- Header & Tombol Kembali -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 class="text-xl font-black text-slate-800 uppercase tracking-wider">
+          Daftar Transaksi Parkir
+        </h1>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>QR Code</th>
-          <th>Kode Tiket</th>
-          <th>Kategori</th>
-          <th>No Plat</th>
-          <th>Total Bayar</th>
-          <th>Uang Bayar</th>
-          <th>Kembalian</th>
-          <th>Status</th>
-          <th>Tanggal</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="loading">
-          <td colspan="10" class="text-center">Memuat data transaksi...</td>
-        </tr>
-        <tr v-else-if="transaksis.length === 0">
-          <td colspan="10" class="text-center">Belum ada transaksi recorded.</td>
-        </tr>
-        <tr v-else v-for="(item, index) in transaksis" :key="item.id">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <!-- Menampilkan Gambar QR Code dari Route Backend -->
-            <img 
-              v-if="item.kode_tiket" 
-              :src="`http://localhost:8000/api/qrcode/${item.kode_tiket}`" 
-              alt="QR Code" 
-              class="qr-img"
-            />
-            <span v-else class="text-muted">-</span>
-          </td>
-          <td><strong>{{ item.kode_tiket }}</strong></td>
-          <td>{{ item.kategori }}</td>
-          <td>{{ item.no_plat }}</td>
-          <td>Rp {{ Number(item.total_bayar).toLocaleString('id-ID') }}</td>
-          <td>Rp {{ Number(item.uang_bayar).toLocaleString('id-ID') }}</td>
-          <td>Rp {{ Number(item.kembalian).toLocaleString('id-ID') }}</td>
-          <td>
-            <span class="badge badge-success">{{ item.status }}</span>
-          </td>
-          <td>{{ formatDate(item.created_at) }}</td>
-        </tr>
-      </tbody>
-    </table>
+        <div class="flex items-center gap-3">
+          <!-- Tombol Kembali ke Dashboard -->
+          <button
+            @click="router.push('/petugas')"
+            class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md transition flex items-center gap-2 cursor-pointer"
+          >
+            <span>←</span> Kembali ke Dashboard
+          </button>
+
+          <!-- Tombol Transaksi Baru -->
+          <NuxtLink 
+            to="/petugas/transaksi/payment" 
+            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition"
+          >
+            + Transaksi Baru
+          </NuxtLink>
+        </div>
+      </div>
+
+      <!-- Tabel Data Transaksi -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-center border-collapse">
+          <thead>
+            <tr class="border-b-2 border-slate-300 text-xs font-extrabold text-slate-600 uppercase">
+              <th class="p-3">No</th>
+              <th class="p-3">QR Code</th>
+              <th class="p-3">Kode Tiket</th>
+              <th class="p-3">Kategori</th>
+              <th class="p-3">No Plat</th>
+              <th class="p-3">Total Bayar</th>
+              <th class="p-3">Uang Bayar</th>
+              <th class="p-3">Kembalian</th>
+              <th class="p-3">Status</th>
+              <th class="p-3">Tanggal</th>
+            </tr>
+          </thead>
+          <tbody class="text-xs">
+            <tr v-if="loading">
+              <td colspan="10" class="p-6 text-slate-400">Memuat data transaksi...</td>
+            </tr>
+            <tr v-else-if="transaksis.length === 0">
+              <td colspan="10" class="p-6 text-slate-400">Belum ada transaksi recorded.</td>
+            </tr>
+            <tr v-else v-for="(item, index) in transaksis" :key="item.id" class="border-b border-slate-100 font-semibold text-slate-700">
+              <td class="p-3">{{ index + 1 }}</td>
+              <td class="p-3 flex justify-center">
+                <img 
+                  v-if="item.kode_tiket" 
+                  :src="`http://localhost:8000/api/qrcode/${item.kode_tiket}`" 
+                  alt="QR Code" 
+                  class="w-12 h-12 object-contain"
+                />
+                <span v-else class="text-slate-400">-</span>
+              </td>
+              <td class="p-3 font-bold text-slate-800">{{ item.kode_tiket }}</td>
+              <td class="p-3 capitalize">{{ item.kategori || 'Motor' }}</td>
+              <td class="p-3 uppercase font-bold">{{ item.no_plat || '-' }}</td>
+              <td class="p-3">Rp {{ Number(item.total_bayar || 0).toLocaleString('id-ID') }}</td>
+              <td class="p-3">Rp {{ Number(item.uang_bayar || 0).toLocaleString('id-ID') }}</td>
+              <td class="p-3">Rp {{ Number(item.kembalian || 0).toLocaleString('id-ID') }}</td>
+              <td class="p-3">
+                <span class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-700">
+                  {{ item.status || 'lunas' }}
+                </span>
+              </td>
+              <td class="p-3">{{ formatDate(item.created_at) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-const transaksis = ref([])
+definePageMeta({
+  middleware: 'auth'
+});
+
+const { $api } = useNuxtApp()
+const router = useRouter()
+
+const transaksis = ref<any[]>([])
 const loading = ref(true)
 
 const fetchTransaksi = async () => {
   loading.value = true
   try {
-    const res = await fetch('http://localhost:8000/api/transaksi')
-    const data = await res.json()
-    transaksis.value = data.data || []
+    const res = await $api.get('/transaksi')
+    transaksis.value = res.data.data || res.data || []
   } catch (err) {
     console.error('Gagal mengambil data transaksi:', err)
+    transaksis.value = []
   } finally {
     loading.value = false
   }
 }
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: any) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleString('id-ID')
 }
@@ -85,74 +117,3 @@ onMounted(() => {
   fetchTransaksi()
 })
 </script>
-
-<style scoped>
-.transaksi-container {
-  padding: 24px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.btn-add {
-  background: #2563eb;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.table th, .table td {
-  border: 1px solid #e5e7eb;
-  padding: 12px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-.table th {
-  background: #f9fafb;
-  font-weight: 600;
-}
-
-.qr-img {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-  display: block;
-}
-
-.text-muted {
-  color: #9ca3af;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.badge-success {
-  background: #d1fae5;
-  color: #065f46;
-}
-</style>

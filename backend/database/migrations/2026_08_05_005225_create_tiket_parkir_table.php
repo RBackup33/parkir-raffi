@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->string('kode_tiket')->unique();
 
-            $table->string('qr_code')->unique();
+$table->longText('qr_code')->nullable();
 
             $table->enum('status', ['masuk', 'keluar'])
                   ->default('masuk');

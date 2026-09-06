@@ -1,36 +1,48 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/solid";
+import { ref } from 'vue'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/solid'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const { $api } = useNuxtApp() as any
 
 const form = ref({
-  email: "",
-  password: "",
-});
+  email: '',
+  password: '',
+})
 
-const isLoading = ref(false);
-const errorMessage = ref("");
-const showPassword = ref(false);
+const isLoading = ref(false)
+const errorMessage = ref('') // <--- INI YANG SEBELUMNYA KURANG / BELUM ADA
+const showPassword = ref(false)
 
 const handleLogin = async () => {
-  errorMessage.value = "";
-  isLoading.value = true;
+  errorMessage.value = ''
+  isLoading.value = true
 
   try {
-    // Ubah URL '/api/login' sesuai dengan endpoint backend/API login Anda
-    const response = await $fetch("/api/login", {
-      method: "POST",
-      body: form.value,
-    });
+    const response = await $api.post('/login', {
+      email: form.value.email,
+      password: form.value.password,
+    })
 
-    // Jika login berhasil, arahkan ke halaman utama
-    navigateTo("/");
+    if (response.data && response.data.token) {
+      localStorage.setItem('token', response.data.token)
+      
+      const userRole = response.data.user?.role || 'petugas'
+      localStorage.setItem('role', userRole)
+
+      if (userRole === 'admin') {
+        router.push('/admin/dashboard')
+      } else {
+        router.push('/petugas/')
+      }
+    }
   } catch (error: any) {
-    // Menangkap pesan error dari backend
-    errorMessage.value = error.data?.message || "Terjadi kesalahan saat login.";
+    errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat login.'
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-};
+}
 </script>
 
 <template>
@@ -42,7 +54,7 @@ const handleLogin = async () => {
         <p class="text-sm text-gray-500 mt-1">Silakan masuk ke akun Anda</p>
       </div>
 
-      <!-- Pesan Error -->
+      <!-- Pesan Error (Sekarang aman karena errorMessage sudah dideklarasikan) -->
       <div
         v-if="errorMessage"
         class="bg-red-100 border border-red-400 text-red-700 px-5 py-3 rounded-full text-sm mb-4 text-center"
@@ -92,24 +104,11 @@ const handleLogin = async () => {
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-full transition disabled:opacity-50 mt-2 shadow-md"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-full transition disabled:opacity-50 mt-2 shadow-md cursor-pointer"
         >
           {{ isLoading ? "Memproses..." : "Masuk" }}
         </button>
       </form>
-
-      <!-- Pilihan Registrasi -->
-      <div class="text-center mt-6 pt-4 border-t border-gray-100">
-        <p class="text-sm text-gray-600">
-          Belum punya akun?
-          <NuxtLink
-            to="/register"
-            class="text-blue-600 hover:text-blue-700 font-semibold underline transition ml-1"
-          >
-            Daftar sekarang
-          </NuxtLink>
-        </p>
-      </div>
     </div>
   </div>
 </template>

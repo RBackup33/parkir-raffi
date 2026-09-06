@@ -18,8 +18,10 @@ return new class extends Migration
             $table->string('nama_member');
             $table->string('nama_perusahaan')->nullable();
             $table->decimal('total_harga', 15, 2)->default(0);
+            $table->decimal('jumlah_bayar', 15, 2)->default(0);
             $table->decimal('kembalian', 15, 2)->default(0);
             $table->string('status')->default('belum lunas');
+            $table->date('tanggal_bayar')->nullable();
             $table->date('tanggal_mulai')->nullable();
             $table->date('tanggal_expired')->nullable();
             $table->timestamps();
